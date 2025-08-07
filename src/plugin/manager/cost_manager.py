@@ -153,8 +153,22 @@ class CostManager(BaseManager):
             result["billed_date"] = billed_date
 
         else:
-            year = result["year"]
-            month = result["month"]
+            # year = result["year"]
+            # month = result["month"]
+            
+            # invoice.month에서 year와 month 추출 (예: 202507 -> year=2025, month=07)
+            if result.get("invoice.month"):
+                invoice_month = str(result["invoice.month"])
+                if len(invoice_month) == 6:  # YYYYMM 형식
+                    year = invoice_month[:4]
+                    month = invoice_month[4:6]
+                else:
+                    year = result.get("year")
+                    month = result.get("month")
+            else:
+                year = result.get("year")
+                month = result.get("month")
+            
             day = result.get("day", "01")
 
             if len(month) == 1:
@@ -173,6 +187,8 @@ class CostManager(BaseManager):
         if result.get("billed_date"):
             return True
         elif result.get("year") and result.get("month"):
+            return False
+        elif result.get("invoice.month"):
             return False
         else:
             _LOGGER.error(f"[_is_not_empty_billed_at] billed_at is empty: {result}")
