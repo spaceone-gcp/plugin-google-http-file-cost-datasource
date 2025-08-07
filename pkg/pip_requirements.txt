@@ -1,0 +1,6 @@
+schematics
+requests
+pandas
+numpy
+chardet
+google-cloud-storage
