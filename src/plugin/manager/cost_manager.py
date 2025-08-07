@@ -156,10 +156,9 @@ class CostManager(BaseManager):
             # year = result["year"]
             # month = result["month"]
             
-            # invoice.month에서 year와 month 추출 (예: 202507 -> year=2025, month=07)
             if result.get("invoice.month"):
                 invoice_month = str(result["invoice.month"])
-                if len(invoice_month) == 6:  # YYYYMM 형식
+                if len(invoice_month) == 6:
                     year = invoice_month[:4]
                     month = invoice_month[4:6]
                 else:

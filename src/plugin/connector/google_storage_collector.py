@@ -24,13 +24,10 @@ class GoogleStorageConnector(BaseConnector):
         self.secret_data = kwargs.get("secret_data")
         self.project_id = self.secret_data.get("project_id")
         
-        # private key 정리
         if "private_key" in self.secret_data:
             private_key = self.secret_data["private_key"]
-            # 여러 가지 형식 처리
             private_key = private_key.replace('\\n', '\n')
             private_key = private_key.replace('\\\\n', '\n')
-            # PEM 형식 확인
             if not private_key.startswith('-----BEGIN PRIVATE KEY-----'):
                 _LOGGER.error(f"[GoogleStorageConnector] Invalid private key format")
                 raise ValueError("Invalid private key format")
@@ -60,18 +57,15 @@ class GoogleStorageConnector(BaseConnector):
             blob = bucket.get_blob(blob_name)
 
             if blob:
-                # 디렉토리이거나 빈 파일인 경우 건너뛰기
                 if blob_name.endswith('/') or blob.size == 0:
                     _LOGGER.debug(f"[get_cost_data] Skipping directory or empty file: {blob_name}")
                     continue
                 
-                # CSV 파일이 아닌 경우 건너뛰기
                 if not blob_name.lower().endswith('.csv'):
                     _LOGGER.debug(f"[get_cost_data] Skipping non-CSV file: {blob_name}")
                     continue
                 
                 tmpdir = tempfile.gettempdir()
-                # blob_name에 슬래시가 포함된 경우 파일명만 추출
                 safe_filename = os.path.basename(blob_name) if '/' in blob_name else blob_name
                 csv_file_path = os.path.join(tmpdir, safe_filename)
                 
@@ -106,7 +100,6 @@ class GoogleStorageConnector(BaseConnector):
     @staticmethod
     def _get_csv(csv_file: str) -> List[dict]:
         try:
-            # 파일 존재 여부 확인
             if not os.path.exists(csv_file):
                 _LOGGER.error(f"[_get_csv] File does not exist: {csv_file}")
                 raise FileNotFoundError(f"File not found: {csv_file}")
