@@ -93,42 +93,49 @@ def job_get_tasks(params: dict) -> dict:
 
 @app.route("Cost.get_data")
 def cost_get_data(params: dict) -> Generator[dict, None, None]:
-    """Get external cost data
-
+    """외부 비용 데이터를 가져오는 함수
+    
+    이 함수는 HTTP 파일이나 Google Cloud Storage에서 비용 데이터를 수집하여
+    SpaceONE 비용 분석 플러그인에서 사용할 수 있는 형태로 변환합니다.
+    
     Args:
         params (CostGetDataRequest): {
-            'options': 'dict',      # Required
-            'secret_data': 'dict',  # Required
-            'schema': 'str',
-            'task_options': 'dict',
-            'domain_id': 'str'      # Required
+            'options': 'dict',      # 필수 - 플러그인 설정 옵션
+            'secret_data': 'dict',  # 필수 - 인증 정보 (private_key 포함)
+            'schema': 'str',        # 선택 - 스키마 정보
+            'task_options': 'dict', # 선택 - 작업별 옵션 (base_url 또는 bucket_name)
+            'domain_id': 'str'      # 필수 - 도메인 ID
         }
 
     Returns:
-        Generator[ResourceResponse, None, None]
+        Generator[ResourceResponse, None, None]: 비용 데이터 스트림
         {
-            'cost': 'float',
-            'usage_quantity': 'float',
-            'usage_unit': 'str',
-            'provider': 'str',
-            'region_code': 'str',
-            'product': 'str',
-            'usage_type': 'str',
-            'resource': 'str',
-            'tags': 'dict'
-            'additional_info': 'dict'
-            'data': 'dict'
-            'billed_date': 'str'
+            'cost': 'float',           # 비용 금액
+            'usage_quantity': 'float', # 사용량
+            'usage_unit': 'str',       # 사용량 단위
+            'provider': 'str',         # 클라우드 제공자
+            'region_code': 'str',      # 리전 코드
+            'product': 'str',          # 제품명
+            'usage_type': 'str',       # 사용 유형
+            'resource': 'str',         # 리소스명
+            'tags': 'dict',            # 태그 정보
+            'additional_info': 'dict', # 추가 정보
+            'data': 'dict',            # 원본 데이터
+            'billed_date': 'str'       # 청구 날짜
         }
     """
 
+    # 옵션과 시크릿 데이터 추출
     options = params["options"]
     secret_data = params["secret_data"]
+    # PEM 키의 개행 문자 정리
     secret_data['private_key'] = _clean_pem(secret_data['private_key'])
 
+    # 작업 옵션과 스키마 추출 (기본값 설정)
     task_options = params.get("task_options", {})
     schema = params.get("schema")
 
+    # 비용 매니저를 통해 데이터 수집
     cost_mgr = CostManager()
     return cost_mgr.get_data(options, secret_data, schema, task_options)
 
