@@ -10,7 +10,7 @@
         "env": {
           "PYTHONPATH": "./src:"
         },
-        "args": ["run", "grpc-server", "plugin"]
+        "args": ["run", "plugin-server", "plugin"]
       }
     ]
   }
